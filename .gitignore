@@ -1,3 +1,6 @@
 testVideos/
 bin/
 lib/
+*.png
+*.jpg
+*.bmp
