@@ -26,11 +26,11 @@ import org.bytedeco.javacv.Frame;
 public class Launch {
 	
 	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-		System.setProperty("sun.java2d.noddraw", "true");
-		if(args.length < 3 | Integer.parseInt(args[0]) < 1) {
+		System.setProperty("sun.java2d.noddraw", "true");	
+		if(args.length < 3 || Integer.parseInt(args[0]) < 1) {
 			System.err.println("Correct usage: java -jar <jar> <workers> <screenshotDir> <videoDir>");
 		}
-		hashVideos(args[2], hashScreenshots(args[1]), Integer.parseInt(args[0]));
+		//hashVideos(args[2], hashScreenshots(args[1]), Integer.parseInt(args[0]));
 		hashVideos(null, null, 1);
 	}
 	
@@ -44,12 +44,12 @@ public class Launch {
 		
 		ArrayList<ScreenHash> screenshotHashes = new ArrayList<ScreenHash>(screenshots.length);
 		
-		AvgHasher hasher = new AvgHasher();
+		DHasher hasher = new DHasher();
 		for (File file : screenshots) {
 			if(file.isFile() && file.canRead()) {
 				try {
 					BufferedImage image = ImageIO.read(file);
-					screenshotHashes.add(new ScreenHash(file.getAbsolutePath(), hasher.getHash(image)));
+					screenshotHashes.add(new ScreenHash(file.getAbsolutePath(), hasher.hash(image)));
 					System.out.println(file.getName() + " hashed.");
 				} catch (IOException e) {
 					System.err.println(file.getName() + " is not an image. Supported formats are bmp,png, and jpg.");
