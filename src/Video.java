@@ -3,7 +3,7 @@ public class Video {
 	
 	private final String video;
 	private ScreenHash closestMatch;
-	private int distance = -1;
+	private int distance = Integer.MAX_VALUE;
 	
 	public Video(String path) {
 		this.video = path;
