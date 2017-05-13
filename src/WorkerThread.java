@@ -59,13 +59,14 @@ public class WorkerThread extends Thread {
 					for (int j = 0; j < this.frameHashes.length; j++) {
 						int distance = BitManip.hamDistance(this.screenHashes.get(i).getHash(), this.frameHashes[j]);
 						if (distance < videoHash.getClosestDistance()) {
-							System.out.println("distance: " + distance + " location: " + j + " screenshot: " + i);
 							besthashloc = j;
 							videoHash.setClosestMatch(this.screenHashes.get(i));
 							videoHash.setClosestDistance(distance);
+							System.out.println("distance: " + distance + " location: " + j + " screenshot: " + i);
 						}
 					}
 				}
+				System.out.println("from episode: " + videoHash.getClosestMatch().getScreenshot());
 				System.out.println(videoHash.getClosestDistance());
 				//frameGrabber.start();
 				frameGrabber.setFrameNumber(besthashloc);
