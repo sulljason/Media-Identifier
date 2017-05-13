@@ -38,7 +38,7 @@ public class WorkerThread extends Thread {
 				this.frameHashes = new long[frameGrabber.getLengthInFrames()];
 				
 				img = new BufferedImage(frameGrabber.getImageWidth(), frameGrabber.getImageHeight(), BufferedImage.TYPE_3BYTE_BGR);
-				for(int i = 0; i < 1000; i++) {
+				for(int i = 0; i < this.frameHashes.length; i++) {
 					ByteBuffer ffmpegBuffer = (ByteBuffer)frameGrabber.grabImage().image[0];
 					byte[] imgBuffer = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
 					ffmpegBuffer.get(imgBuffer); //Copy the FFmpeg image buffer into a buffered image.
@@ -67,7 +67,7 @@ public class WorkerThread extends Thread {
 				}
 				System.out.println(videoHash.getClosestDistance());
 				//frameGrabber.start();
-				//frameGrabber.setFrameNumber(besthashloc);
+				frameGrabber.setFrameNumber(besthashloc);
 				img = new BufferedImage(frameGrabber.getImageWidth(), frameGrabber.getImageHeight(), BufferedImage.TYPE_3BYTE_BGR);
 				ByteBuffer ffmpegBuffer = (ByteBuffer)frameGrabber.grabImage().image[0];
 				byte[] imgBuffer = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
