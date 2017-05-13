@@ -29,9 +29,10 @@ public class Launch {
 		System.setProperty("sun.java2d.noddraw", "true");	
 		if(args.length < 3 || Integer.parseInt(args[0]) < 1) {
 			System.err.println("Correct usage: java -jar <jar> <workers> <screenshotDir> <videoDir>");
+			System.exit(0);
 		}
-		//hashVideos(args[2], hashScreenshots(args[1]), Integer.parseInt(args[0]));
-		hashVideos(null, null, 1);
+		hashVideos(args[2], hashScreenshots(args[1]), Integer.parseInt(args[0]));
+		//hashVideos(null, null, 1);
 	}
 	
 	private static ArrayList<ScreenHash> hashScreenshots(String screenDir) {
@@ -66,14 +67,23 @@ public class Launch {
 			System.err.println("Video directory could not be found.");
 			System.exit(0);
 		}
-		ArrayList<Video> videos = new ArrayList<Video>(videoFiles.length);
-		for (File file : videoFiles) {
-			if (file.isFile() && file.canRead()) {
-				videos.add(new Video(file.getAbsolutePath()));
-			}
-		}
 		System.out.println("Spinning up " + workers + " worker threads.");
 		BasicWorkerPool workerPool = new BasicWorkerPool(workers, scrnHashes, null);
 		System.out.println("Putting coffee in them...");
+		workerPool.startWorkers();
+		
+		for (File file : videoFiles) {
+			if (file.isFile() && file.canRead()) {
+				workerPool.addVideo(new Video(file.getAbsolutePath()));
+			}
+		}
+		
+		try {
+			Thread.sleep(10000000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }

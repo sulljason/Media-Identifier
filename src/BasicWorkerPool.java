@@ -3,11 +3,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
 public class BasicWorkerPool {
 	
 	private final WorkerThread[] workerPool;
-	private final LinkedBlockingQueue workQueue = new LinkedBlockingQueue();
+	private final LinkedBlockingQueue<Video> workQueue = new LinkedBlockingQueue<Video>();
 	private boolean workersRunning = false;
 	
 	public BasicWorkerPool(int workers, ArrayList<ScreenHash> screenHashes, List<Video> videoHashes) {
@@ -17,9 +16,23 @@ public class BasicWorkerPool {
 		}
 	}
 	
+	//Adds a new video to the work queue
+	//Returns number of elements currently in queue
+	public int addVideo(Video video) {
+		workQueue.add(video);
+		
+		return workQueue.size(); 
+	}
+	
 	public void stopWorkers() {
 		for(int i = 0; i  < this.workerPool.length; i++) {
 			this.workerPool[i].stopWorker();
+		}
+	}
+	
+	public void startWorkers() {
+		for(int i = 0; i  < this.workerPool.length; i++) {
+			this.workerPool[i].start();
 		}
 	}
 	

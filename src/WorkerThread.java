@@ -16,7 +16,7 @@ import org.bytedeco.javacv.FrameGrabber.Exception;
 
 public class WorkerThread extends Thread {
 	
-	private final LinkedBlockingQueue<String> workQueue;
+	private final LinkedBlockingQueue<Video> workQueue;
 	private String currentFile;
 	private long[] frameHashes;
 	private final List<Video> videoHashes;
@@ -25,7 +25,7 @@ public class WorkerThread extends Thread {
 	private boolean running = false;
 	private boolean workCompleted = true;
 	
-	public WorkerThread(List<Video> videoHashes, ArrayList<ScreenHash> screenHashes, LinkedBlockingQueue queue) {
+	public WorkerThread(List<Video> videoHashes, ArrayList<ScreenHash> screenHashes, LinkedBlockingQueue<Video> queue) {
 		this.videoHashes = videoHashes;
 		this.workQueue = queue;
 		this.screenHashes = screenHashes;
@@ -38,7 +38,7 @@ public class WorkerThread extends Thread {
 		this.workCompleted = false;
 		while(this.running) {
 			try {
-				this.currentFile = this.workQueue.take();
+				this.currentFile = this.workQueue.take().getVideo();
 				FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(this.currentFile);
 				this.frameHashes = new long[frameGrabber.getLengthInFrames()];
 				
