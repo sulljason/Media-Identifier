@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class BasicWorkerPool {
@@ -9,10 +7,10 @@ public class BasicWorkerPool {
 	private final LinkedBlockingQueue<Video> workQueue = new LinkedBlockingQueue<Video>();
 	private boolean workersRunning = false;
 	
-	public BasicWorkerPool(int workers, ArrayList<ScreenHash> screenHashes, List<Video> videoHashes) {
+	public BasicWorkerPool(int workers, ArrayList<ScreenHash> screenHashes) {
 		this.workerPool = new WorkerThread[workers];
 		for(int i = 0; i < workers; i++) {
-			this.workerPool[i] = new WorkerThread(videoHashes, screenHashes, this.workQueue);
+			this.workerPool[i] = new WorkerThread(screenHashes, this.workQueue);
 		}
 	}
 	

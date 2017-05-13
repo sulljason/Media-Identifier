@@ -1,17 +1,13 @@
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.bytedeco.javacpp.RealSense.frame;
+import javax.imageio.ImageIO;
+
 import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.FrameGrabber.Exception;
 
 public class WorkerThread extends Thread {
@@ -19,14 +15,12 @@ public class WorkerThread extends Thread {
 	private final LinkedBlockingQueue<Video> workQueue;
 	private String currentFile;
 	private long[] frameHashes;
-	private final List<Video> videoHashes;
 	private final ArrayList<ScreenHash> screenHashes;
 	private final DHasher hasher = new DHasher();
 	private boolean running = false;
 	private boolean workCompleted = true;
 	
-	public WorkerThread(List<Video> videoHashes, ArrayList<ScreenHash> screenHashes, LinkedBlockingQueue<Video> queue) {
-		this.videoHashes = videoHashes;
+	public WorkerThread(ArrayList<ScreenHash> screenHashes, LinkedBlockingQueue<Video> queue) {
 		this.workQueue = queue;
 		this.screenHashes = screenHashes;
 	}
@@ -40,43 +34,58 @@ public class WorkerThread extends Thread {
 			try {
 				this.currentFile = this.workQueue.take().getVideo();
 				FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(this.currentFile);
+				frameGrabber.start();
 				this.frameHashes = new long[frameGrabber.getLengthInFrames()];
 				
-				frameGrabber.start();
 				img = new BufferedImage(frameGrabber.getImageWidth(), frameGrabber.getImageHeight(), BufferedImage.TYPE_3BYTE_BGR);
-				for(int i = 0; i < this.frameHashes.length; i++) {
-					ByteBuffer ffmpegBuffer = (ByteBuffer)  frameGrabber.grabImage().image[0];
-					byte[] imgBuffer = ((DataBufferByte)img.getData().getDataBuffer()).getData();
+				for(int i = 0; i < 1000; i++) {
+					ByteBuffer ffmpegBuffer = (ByteBuffer)frameGrabber.grabImage().image[0];
+					byte[] imgBuffer = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
 					ffmpegBuffer.get(imgBuffer); //Copy the FFmpeg image buffer into a buffered image.
 					ffmpegBuffer.flip(); //DO A FLIP!
-					this.frameHashes[i] = ImagePHasher.getHash(img);
+					this.frameHashes[i] = hasher.hash(img);
 				}
-				frameGrabber.stop();
-				frameGrabber.flush();
-				frameGrabber = null;
+				//frameGrabber.stop();
+				//frameGrabber.close();
+				//frameGrabber = null;
 				
 				System.out.println(this.getName() + ": Finished processing and hashing " + this.currentFile + ".");
 				System.out.println(this.getName() + ": Now searching screenshots for best match.");
 				
 				//Find the closest pair of a video frame and a screenshot.
 				Video videoHash = new Video(this.currentFile);
-				for(int i = 0; i < this.screenHashes.size(); i++) {
-					for(int j = 0; j < this.frameHashes.length; j++) {
+				int besthashloc = 0;
+				for (int i = 0; i < this.screenHashes.size(); i++) {
+					for (int j = 0; j < this.frameHashes.length; j++) {
 						int distance = BitManip.hamDistance(this.screenHashes.get(i).getHash(), this.frameHashes[j]);
-						if(distance < videoHash.getClosestDistance()) {
+						if (distance < videoHash.getClosestDistance()) {
+							besthashloc = i;
 							videoHash.setClosestMatch(this.screenHashes.get(i));
 							videoHash.setClosestDistance(distance);
 						}
 					}
 				}
-				this.videoHashes.add(videoHash);
+				System.out.println(videoHash.getClosestDistance());
+				//frameGrabber.start();
+				//frameGrabber.setFrameNumber(besthashloc);
+				img = new BufferedImage(frameGrabber.getImageWidth(), frameGrabber.getImageHeight(), BufferedImage.TYPE_3BYTE_BGR);
+				ByteBuffer ffmpegBuffer = (ByteBuffer)frameGrabber.grabImage().image[0];
+				byte[] imgBuffer = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
+				ffmpegBuffer.get(imgBuffer); //Copy the FFmpeg image buffer into a buffered image.
+				ImageIO.write(img, "bmp", new File(this.currentFile + ".bmp"));
+				frameGrabber.stop();
+				frameGrabber.close();
+				//Deal with stuff
+				
 			} catch (InterruptedException e) {
 				this.running = false;
 				System.out.println(this.getName() + ": STOP signal recieved. Completing current job then stopping.");
 			} catch (Exception e) {
 				System.err.println("Failed to read frame from " + currentFile + " skipping file.");
+				e.printStackTrace();
 			} catch (java.lang.Exception e) {
 				System.err.println("Failed to read frame from " + currentFile + " skipping file.");
+				e.printStackTrace();
 			}
 		}
 		this.workCompleted = true;
