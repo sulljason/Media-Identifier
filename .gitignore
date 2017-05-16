@@ -1,5 +1,7 @@
 testVideos/
 bin/
+.classpath
+.settings/
 *.png
 *.jpg
 *.bmp
