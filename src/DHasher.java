@@ -7,7 +7,7 @@ import net.coobird.thumbnailator.resizers.BilinearResizer;
 public class DHasher {
 	
 	private static final BilinearResizer resizer = new BilinearResizer();
-	private final BufferedImage image = new BufferedImage(9, 8, BufferedImage.TYPE_BYTE_GRAY);
+	private final BufferedImage image = new BufferedImage(9, 8, BufferedImage.TYPE_3BYTE_BGR);
 	private final byte[] imgBuffer = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
 	
 	public long hash(BufferedImage img) {

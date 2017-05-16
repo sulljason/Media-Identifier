@@ -49,7 +49,7 @@ public class Launch {
 			System.err.println("Video directory could not be found.");
 			System.exit(0);
 		}
-		System.out.println("Spinning up " + workers + " worker threads.");
+		System.out.println("Spinning up " + workers + " worker thread(s).");
 		BasicWorkerPool workerPool = new BasicWorkerPool(workers, scrnHashes);
 		System.out.println("Putting coffee in them...");
 		workerPool.startWorkers();
