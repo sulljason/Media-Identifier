@@ -79,6 +79,10 @@ public class WorkerThread extends Thread {
 				frameGrabber.close();
 				//Deal with stuff
 				
+				File file = new File(videoHash.getClosestMatch().getScreenshot());
+				BufferedImage image = ImageIO.read(file);
+				ImageIO.write(image, "bmp", new File(this.currentFile + "_goal.bmp"));
+				
 			} catch (InterruptedException e) {
 				this.running = false;
 				System.out.println(this.getName() + ": STOP signal recieved. Completing current job then stopping.");
